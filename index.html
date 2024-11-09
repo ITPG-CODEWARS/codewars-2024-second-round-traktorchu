@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="src/output.css" />
+
+  </head>
+  <body>
+    <header>
+      <div class="navbar bg-base-100">
+        <div class="flex-1">
+          <a href="index.html" class="text-2xl font-bold cursor-pointer">URLSH</a>
+        </div>
+        <div class="flex-none">
+          <ul class="menu menu-horizontal px-1">
+            <li><a href="Contacts.html">Contacts</a></li>
+          </ul>
+        </div>
+      </div>
+
+
+    </header>
+    <!-- Basic form with a text input for a URL and a submit button -->
+    <form id="testform">
+      <label> Url </label>
+      <input type="text" id="test" name="test" />
+      <button type="submit">enter</button>
+    </form>
+
+    <script type="module">
+      // Import Firebase SDK components for app initialization and database operations
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        push,
+        get,
+        set,
+        runTransaction,
+      } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyA6UO6k_QfGVvlbe7dGCMiBXvwKeg7Hu1M",
+        authDomain: "urlsh-abf12.firebaseapp.com",
+        databaseURL:
+          "https://urlsh-abf12-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "urlsh-abf12",
+        storageBucket: "urlsh-abf12.firebasestorage.app",
+        messagingSenderId: "200459515633",
+        appId: "1:200459515633:web:d3740a859106a9fe6e1b50",
+        measurementId: "G-CK1CJZ6JN1",
+      };
+
+      // Initialize Firebase app and database
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
+
+      // Form submission handler
+      const form = document.getElementById("testform");
+      form.addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevents page reload on form submit
+
+        // Capture URL input value
+        const url = document.getElementById("test").value;
+
+        // Data structure to push to Firebase
+        const dbPush = { item: url };
+
+        // Push data to the 'users' reference in the Firebase database
+        push(ref(database, "users"), dbPush)
+          .then(function () {
+            alert("Data sent to Firebase successfully!");
+          })
+          .catch(function (error) {
+            console.error("Error sending data to Firebase:", error);
+            alert("Error sending data to Firebase. Check console for details.");
+          });
+      });
+    </script>
+  </body>
+</html>
