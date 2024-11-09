@@ -4,31 +4,47 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>URL Shortener</title>
     <link rel="stylesheet" href="src/output.css" />
-
   </head>
-  <body>
-    <header>
-      <div class="navbar bg-base-100">
-        <div class="flex-1">
-          <a href="index.html" class="text-2xl font-bold cursor-pointer">URLSH</a>
-        </div>
-        <div class="flex-none">
-          <ul class="menu menu-horizontal px-1">
-            <li><a href="Contacts.html">Contacts</a></li>
+  <body class="bg-gray-900 text-white min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="w-full bg-gray-800 shadow-md">
+      <div class="max-w-7xl mx-auto p-4">
+        <div class="flex justify-between items-center">
+          <a href="index.html" class="text-2xl font-bold text-white hover:text-gray-400">URLSH</a>
+          <ul class="flex space-x-6 text-white">
+            <li><a href="Contacts.html" class="hover:text-green-500">Contacts</a></li>
           </ul>
         </div>
       </div>
-
-
     </header>
-    <!-- Basic form with a text input for a URL and a submit button -->
-    <form id="testform">
-      <label> Url </label>
-      <input type="text" id="test" name="test" />
-      <button type="submit">enter</button>
-    </form>
+
+    <!-- Form Section -->
+    <div class="flex items-center justify-center flex-grow">
+      <div class="flex flex-col items-center space-y-4 p-6">
+        <!-- URL input form -->
+        <form id="testform" class="w-full max-w-lg p-6 bg-gray-800 rounded-lg shadow-lg">
+          <label class="block text-lg font-semibold mb-3" for="test">Enter URL:</label>
+          <input type="text" id="test" name="test" class="w-full p-3 border border-gray-300 rounded-md mb-4 bg-gray-900 text-white" placeholder="https://example.com" />
+          <button type="submit" class="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">Create Short URL</button>
+        </form>
+
+        <!-- CRUD Buttons -->
+        <div class="w-full max-w-lg space-y-2">
+          <button class="w-full p-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300">Read</button>
+          <button class="w-full p-3 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition duration-300">Update</button>
+          <button class="w-full p-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="bg-gray-800 py-4 mt-10">
+      <div class="text-center text-gray-400">
+        <p>&copy; 2024 URLSH. All rights reserved.</p>
+      </div>
+    </footer>
 
     <script type="module">
       // Import Firebase SDK components for app initialization and database operations
@@ -37,17 +53,13 @@
         getDatabase,
         ref,
         push,
-        get,
-        set,
-        runTransaction,
       } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
       // Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyA6UO6k_QfGVvlbe7dGCMiBXvwKeg7Hu1M",
         authDomain: "urlsh-abf12.firebaseapp.com",
-        databaseURL:
-          "https://urlsh-abf12-default-rtdb.europe-west1.firebasedatabase.app",
+        databaseURL: "https://urlsh-abf12-default-rtdb.europe-west1.firebasedatabase.app",
         projectId: "urlsh-abf12",
         storageBucket: "urlsh-abf12.firebasestorage.app",
         messagingSenderId: "200459515633",
@@ -81,5 +93,6 @@
           });
       });
     </script>
+
   </body>
 </html>
