@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirecting...</title>
+  </head>
+  <body>
+    <h1>Redirecting...</h1>
+
+    <!-- Firebase SDK and custom script -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+    <script type="module">
+        // Import Firebase SDK components for app initialization and database operations
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import {
+          getDatabase,
+          ref,
+          get,
+        } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+      
+        // Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyA6UO6k_QfGVvlbe7dGCMiBXvwKeg7Hu1M",
+          authDomain: "urlsh-abf12.firebaseapp.com",
+          databaseURL: "https://urlsh-abf12-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "urlsh-abf12",
+          storageBucket: "urlsh-abf12.firebasestorage.app",
+          messagingSenderId: "200459515633",
+          appId: "1:200459515633:web:d3740a859106a9fe6e1b50",
+          measurementId: "G-CK1CJZ6JN1",
+        };
+      
+        // Initialize Firebase app and database
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+      
+        // Extract the short URL from the query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const shortUrl = urlParams.get("test");
+      
+        // Fetch the data from Firebase based on the short URL
+        const dbRef = ref(database, "users");
+        get(dbRef)
+          .then((snapshot) => {
+            if (snapshot.exists()) {
+              snapshot.forEach((childSnapshot) => {
+                const childData = childSnapshot.val();
+                if (childData.shorturl === shortUrl) {
+                  window.location.href = childData.item; // Redirect to the long URL
+                }
+              });
+            } else {
+              console.log("No data available");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching data: ", error);
+          });
+      </script>
+      
+  </body>
+</html>

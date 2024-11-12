@@ -8,14 +8,19 @@
     <link rel="stylesheet" href="src/output.css" />
   </head>
   <body class="bg-gray-900 text-white min-h-screen flex flex-col">
-
     <!-- Navbar -->
     <header class="w-full bg-gray-800 shadow-md">
       <div class="max-w-7xl mx-auto p-4">
         <div class="flex justify-between items-center">
-          <a href="index.html" class="text-2xl font-bold text-white hover:text-gray-400">URLSH</a>
+          <a
+            href="index.html"
+            class="text-2xl font-bold text-white hover:text-gray-400"
+            >SHORTY</a
+          >
           <ul class="flex space-x-6 text-white">
-            <li><a href="Contacts.html" class="hover:text-green-500">Contacts</a></li>
+            <li>
+              <a href="Contacts.html" class="hover:text-green-500">Contacts</a>
+            </li>
           </ul>
         </div>
       </div>
@@ -25,26 +30,72 @@
     <div class="flex items-center justify-center flex-grow">
       <div class="flex flex-col items-center space-y-4 p-6">
         <!-- URL input form -->
-        <form id="testform" class="w-full max-w-lg p-6 bg-gray-800 rounded-lg shadow-lg">
-          <label class="block text-lg font-semibold mb-3" for="test">Enter URL:</label>
-          <input type="text" id="test" name="test" class="w-full p-3 border border-gray-300 rounded-md mb-4 bg-gray-900 text-white" placeholder="https://example.com" />
-          <button type="submit" class="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">Create Short URL</button>
+        <form
+          id="testform"
+          class="w-full max-w-lg p-6 bg-gray-800 rounded-lg shadow-lg"
+        >
+          <label class="block text-lg font-semibold mb-3" for="test"
+            >Enter URL:</label
+          >
+          <input
+            type="text"
+            id="test"
+            name="test"
+            class="w-full p-3 border border-gray-300 rounded-md mb-4 bg-gray-900 text-white"
+            placeholder="https://example.com"
+          />
+          <button
+            type="submit"
+            class="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300"
+          >
+            Create Short URL
+          </button>
         </form>
+
+        <!-- Output Container to display the short and long URLs -->
+        <div
+          id="output"
+          class="w-full max-w-lg p-4 bg-gray-800 rounded-lg shadow-lg mt-6 hidden"
+        >
+          <p class="text-lg font-semibold">
+            Short URL: <span id="shortUrlText" class="text-green-500"></span>
+          </p>
+          <p class="text-lg font-semibold">
+            Original URL: <span id="longUrlText" class="text-blue-500"></span>
+          </p>
+        </div>
 
         <!-- CRUD Buttons -->
         <div class="w-full max-w-lg space-y-2">
-          <button class="w-full p-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300">Read</button>
-          <button class="w-full p-3 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition duration-300">Update</button>
-          <button class="w-full p-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300">Delete</button>
+          <button
+            class="w-full p-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300"
+          >
+            Read
+          </button>
+          <button
+            class="w-full p-3 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition duration-300"
+            id="update"
+          >
+            Update
+          </button>
+          <button
+            class="w-full p-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300"
+            id="delete"
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>
 
     <footer class="bg-gray-800 py-4 mt-10">
       <div class="text-center text-gray-400">
-        <p>&copy; 2024 URLSH. All rights reserved.</p>
+        <p>&copy; 2024 SHORTY. All rights reserved.</p>
       </div>
     </footer>
+
+    <!-- Include Math.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.1/math.min.js"></script>
 
     <script type="module">
       // Import Firebase SDK components for app initialization and database operations
@@ -53,13 +104,16 @@
         getDatabase,
         ref,
         push,
+        get,
+        set,
       } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
       // Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyA6UO6k_QfGVvlbe7dGCMiBXvwKeg7Hu1M",
         authDomain: "urlsh-abf12.firebaseapp.com",
-        databaseURL: "https://urlsh-abf12-default-rtdb.europe-west1.firebasedatabase.app",
+        databaseURL:
+          "https://urlsh-abf12-default-rtdb.europe-west1.firebasedatabase.app",
         projectId: "urlsh-abf12",
         storageBucket: "urlsh-abf12.firebasestorage.app",
         messagingSenderId: "200459515633",
@@ -70,29 +124,210 @@
       // Initialize Firebase app and database
       const app = initializeApp(firebaseConfig);
       const database = getDatabase(app);
+      const form = document.getElementById("testform");
+      const outputContainer = document.getElementById("output");
+
+      // Initialize counter value
+      let counter = 0;
+
+      // Retrieve counter value from Firebase (if it exists)
+      const counterRef = ref(database, "counter");
+      get(counterRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            counter = snapshot.val();
+          } else {
+            // Initialize counter if it does not exist
+            set(counterRef, 1);
+            counter = 1;
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching counter value: ", error);
+        });
+
+      function generateLink() {
+        const letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        let result = "";
+        for (let i = 0; i < 5; i++) {
+          const randomIndex = Math.floor(Math.random() * letter.length);
+          result += letter[randomIndex];
+        }
+        return result;
+      }
 
       // Form submission handler
-      const form = document.getElementById("testform");
       form.addEventListener("submit", function (event) {
         event.preventDefault(); // Prevents page reload on form submit
 
+        // Increment counter
+        counter++;
+
         // Capture URL input value
         const url = document.getElementById("test").value;
+        const shortUrl = generateLink(); // Generate short URL
+
+        // Create the full short URL with the query string
+        const fullShortUrl = `http://127.0.0.1:5500/redirect.html?test=${shortUrl}`;
 
         // Data structure to push to Firebase
-        const dbPush = { item: url };
+        const dbPush = { item: url, id: counter, shorturl: shortUrl };
 
         // Push data to the 'users' reference in the Firebase database
         push(ref(database, "users"), dbPush)
           .then(function () {
-            alert("Data sent to Firebase successfully!");
+            // Update the counter in Firebase
+            set(counterRef, counter);
+
+            // Show the output container with the generated short URL and long URL
+            outputContainer.classList.remove("hidden");
+            document.getElementById("shortUrlText").textContent = fullShortUrl;
+            document.getElementById("longUrlText").textContent = url;
+
+            // Fetch and display only the latest URL after submission
+            fetchLatestUrl();
           })
           .catch(function (error) {
             console.error("Error sending data to Firebase:", error);
             alert("Error sending data to Firebase. Check console for details.");
           });
       });
-    </script>
 
+      // Function to fetch the latest data from Firebase
+      function fetchLatestUrl() {
+        const dbRef = ref(database, "users");
+        get(dbRef)
+          .then((snapshot) => {
+            if (snapshot.exists()) {
+              let dataArray = [];
+              snapshot.forEach((childSnapshot) => {
+                const childData = childSnapshot.val();
+                dataArray.push(childData);
+              });
+
+              // Sort data by the 'id' to get the latest entry
+              dataArray.sort((a, b) => b.id - a.id);
+
+              // Display the most recent URL
+              const latestData = dataArray[0];
+              const latestShortUrl = `http://127.0.0.1:5500/redirect.html?test=${latestData.shorturl}`;
+              document.getElementById("shortUrlText").textContent =
+                latestShortUrl;
+              document.getElementById("longUrlText").textContent =
+                latestData.item;
+            } else {
+              console.log("No data available");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching data: ", error);
+          });
+      }
+      const updateButton = document.getElementById("update");
+      updateButton.addEventListener("click", function () {
+        const oldShortUrl = prompt("Enter the short URL you want to update:");
+        const newUrl = prompt("Enter the new URL:");
+
+        if (oldShortUrl && newUrl) {
+          const dbRef = ref(database, "users");
+
+          // Retrieve data from Firebase to find the entry to update
+          get(dbRef)
+            .then((snapshot) => {
+              if (snapshot.exists()) {
+                let updated = false;
+                snapshot.forEach((childSnapshot) => {
+                  const childData = childSnapshot.val();
+
+                  // Check if the short URL matches the user input
+                  if (childData.shorturl === oldShortUrl) {
+                    // Update the entry with the new URL
+                    const entryRef = ref(
+                      database,
+                      `users/${childSnapshot.key}`
+                    );
+                    set(entryRef, { ...childData, item: newUrl })
+                      .then(() => {
+                        alert("URL updated successfully!");
+                        fetchLatestUrl(); // Refresh the displayed data
+                      })
+                      .catch((error) => {
+                        console.error("Error updating URL:", error);
+                        alert("Error updating URL. Check console for details.");
+                      });
+                    updated = true;
+                  }
+                });
+                if (!updated) {
+                  alert("Short URL not found.");
+                }
+              } else {
+                console.log("No data available");
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching data: ", error);
+            });
+        } else {
+          alert("Both the short URL and new URL are required.");
+        }
+      });
+      // Select the delete button
+      const deleteButton = document.getElementById("delete");
+
+      // Add event listener to handle the delete action
+      deleteButton.addEventListener("click", function () {
+        const shortUrlToDelete = prompt(
+          "Enter the short URL you want to delete:"
+        );
+
+        if (shortUrlToDelete) {
+          const dbRef = ref(database, "users");
+
+          // Retrieve data from Firebase to find the entry to delete
+          get(dbRef)
+            .then((snapshot) => {
+              if (snapshot.exists()) {
+                let deleted = false;
+                snapshot.forEach((childSnapshot) => {
+                  const childData = childSnapshot.val();
+
+                  // Check if the short URL matches the user input
+                  if (childData.shorturl === shortUrlToDelete) {
+                    // Delete the entry
+                    const entryRef = ref(
+                      database,
+                      `users/${childSnapshot.key}`
+                    );
+                    set(entryRef, null)
+                      .then(() => {
+                        alert("URL deleted successfully!");
+                        fetchLatestUrl(); // Refresh the displayed data
+                      })
+                      .catch((error) => {
+                        console.error("Error deleting URL:", error);
+                        alert("Error deleting URL. Check console for details.");
+                      });
+                    deleted = true;
+                  }
+                });
+                if (!deleted) {
+                  alert("Short URL not found.");
+                }
+              } else {
+                console.log("No data available");
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching data: ", error);
+            });
+        } else {
+          alert("Short URL is required for deletion.");
+        }
+      });
+
+      // Call fetchLatestUrl to load the latest data on page load
+      document.addEventListener("DOMContentLoaded", fetchLatestUrl);
+    </script>
   </body>
 </html>
