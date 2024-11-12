@@ -69,6 +69,7 @@
         <div class="w-full max-w-lg space-y-2">
           <button
             class="w-full p-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300"
+            id="read"
           >
             Read
           </button>
@@ -223,6 +224,53 @@
             console.error("Error fetching data: ", error);
           });
       }
+
+      // Select the "Read" button
+      const readButton = document.querySelector(".bg-green-500");
+
+      // Add event listener to handle the read action
+      readButton.addEventListener("click", function () {
+        const shortUrlToRead = prompt("Enter the short URL you want to view:");
+
+        if (shortUrlToRead) {
+          const dbRef = ref(database, "users");
+
+          // Retrieve data from Firebase to find the entry
+          get(dbRef)
+            .then((snapshot) => {
+              if (snapshot.exists()) {
+                let found = false;
+                snapshot.forEach((childSnapshot) => {
+                  const childData = childSnapshot.val();
+
+                  // Check if the short URL matches the user input
+                  if (childData.shorturl === shortUrlToRead) {
+                    // Display the original URL
+                    document.getElementById(
+                      "shortUrlText"
+                    ).textContent = `Short URL: http://127.0.0.1:5500/redirect.html?test=${childData.shorturl}`;
+                    document.getElementById(
+                      "longUrlText"
+                    ).textContent = `Original URL: ${childData.item}`;
+                    outputContainer.classList.remove("hidden"); // Show the output container
+                    found = true;
+                  }
+                });
+                if (!found) {
+                  alert("Short URL not found.");
+                }
+              } else {
+                console.log("No data available");
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching data: ", error);
+            });
+        } else {
+          alert("Short URL is required to view the link.");
+        }
+      });
+
       const updateButton = document.getElementById("update");
       updateButton.addEventListener("click", function () {
         const oldShortUrl = prompt("Enter the short URL you want to update:");
